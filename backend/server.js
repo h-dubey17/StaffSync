@@ -18,7 +18,7 @@ const Training = require('./models/Training');
 
 // 4. Connect to MongoDB Atlas 
 // (Make sure to replace the string below with your actual MongoDB connection string)
-mongoose.connect('YOUR_MONGODB_ATLAS_CONNECTION_STRING_HERE')
+mongoose.connect('mongodb+srv://hrishika_17:StaffSync1234@cluster0.cuenhzf.mongodb.net/staffsync?retryWrites=true&w=majority')
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.log('MongoDB connection error:', err));
 
