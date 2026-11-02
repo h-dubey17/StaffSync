@@ -8,9 +8,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Routes
 const authRoute = require('./routes/auth');
-app.use('/api/auth', authRoute);
+const leaveRoute = require('./routes/leave');
 
+app.use('/api/auth', authRoute);
+app.use('/api/leave', leaveRoute);
+
+// MongoDB Atlas Connection with IPv4 and timeout fixes
 mongoose.connect('mongodb+srv://hrishika_17:StaffSync1234@cluster0.cuenhzf.mongodb.net/staffsync?retryWrites=true&w=majority', {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
