@@ -1,30 +1,78 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+const Attendance = require('./models/Attendance');
+const Announcement = require('./models/Announcement');
+const Training = require('./models/Training');
 
-const app = express();
+// Attendance API
+app.post('/api/attendance/checkin', async (req, res) => {
+  try {
+    const newRecord = new Attendance({
+      userId: req.body.userId,
+      userName: req.body.userName,
+      checkIn: new Date().toLocaleTimeString()
+    });
+    await newRecord.save();
+    res.json({ message: 'Marked Present / Checked In successfully!' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error marking attendance' });
+  }
+});
 
-app.use(express.json());
-app.use(cors());
+app.get('/api/attendance/all', async (req, res) => {
+  try {
+    const records = await Attendance.find().sort({ date: -1 });
+    res.json(records);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching attendance' });
+  }
+});
 
-// Routes
-const authRoute = require('./routes/auth');
-const leaveRoute = require('./routes/leave');
+// Announcements API
+app.post('/api/announcements/create', async (req, res) => {
+  try {
+    const newNotice = new Announcement(req.body);
+    await newNotice.save();
+    res.json({ message: 'Announcement published successfully!' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating announcement' });
+  }
+});
 
-app.use('/api/auth', authRoute);
-app.use('/api/leave', leaveRoute);
+app.get('/api/announcements/all', async (req, res) => {
+  try {
+    const list = await Announcement.find().sort({ createdAt: -1 });
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching announcements' });
+  }
+});
 
-// MongoDB Atlas Connection with IPv4 and timeout fixes
-mongoose.connect('mongodb+srv://hrishika_17:StaffSync1234@cluster0.cuenhzf.mongodb.net/staffsync?retryWrites=true&w=majority', {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-  family: 4,
-})
-  .then(() => console.log('MongoDB Connected Successfully'))
-  .catch((err) => console.log('MongoDB connection error:', err));
+// Training API
+app.post('/api/training/create', async (req, res) => {
+  try {
+    const newTraining = new Training(req.body);
+    await newTraining.save();
+    res.json({ message: 'Training module created!' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating training' });
+  }
+});
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.get('/api/training/all', async (req, res) => {
+  try {
+    const modules = await Training.find().sort({ date: -1 });
+    res.json(modules);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching trainings' });
+  }
+});
+
+// HR / Manager Leave Status Update Route
+app.put('/api/leave/update-status/:id', async (req, res) => {
+  try {
+    const { status } = req.body;
+    await Leave.findByIdAndUpdate(req.params.id, { status });
+    res.json({ message: `Leave status updated to ${status}` });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating leave status' });
+  }
 });
