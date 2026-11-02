@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-// 1. Initialize Express App (Must be at the top!)
+// 1. Initialize Express App
 const app = express();
 
 // 2. Middleware
@@ -16,7 +16,8 @@ const Attendance = require('./models/Attendance');
 const Announcement = require('./models/Announcement');
 const Training = require('./models/Training');
 
-// 4. Connect to MongoDB Atlas
+// 4. Connect to MongoDB Atlas 
+// (Make sure to replace the string below with your actual MongoDB connection string)
 mongoose.connect('YOUR_MONGODB_ATLAS_CONNECTION_STRING_HERE')
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.log('MongoDB connection error:', err));
@@ -26,11 +27,19 @@ mongoose.connect('YOUR_MONGODB_ATLAS_CONNECTION_STRING_HERE')
 // Auth Routes
 app.post('/api/register', async (req, res) => {
   try {
-    const newUser = new User(req.body);
+    const { name, email, password, role } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email is already registered' });
+    }
+
+    const newUser = new User({ name, email, password, role });
     await newUser.save();
     res.json({ message: 'User registered successfully!' });
   } catch (err) {
-    res.status(500).json({ message: 'Error registering user' });
+    res.status(500).json({ message: 'Error registering user', error: err.message });
   }
 });
 
@@ -50,7 +59,7 @@ app.post('/api/leave/apply', async (req, res) => {
   try {
     const newLeave = new Leave(req.body);
     await newLeave.save();
-    res.json({ message: 'Leave submitted' });
+    res.json({ message: 'Leave submitted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Error submitting leave' });
   }
@@ -139,6 +148,6 @@ app.get('/api/training/all', async (req, res) => {
   }
 });
 
-// 5. Start Server (Must be at the very bottom!)
+// 5. Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
